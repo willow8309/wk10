@@ -1,0 +1,1013 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What If? Story Lab</title>
+<style>
+:root{
+ --navy:#182b51;--blue:#4563d9;--ink:#25344d;
+ --line:#dce3ef;--green:#148468;--red:#c34250;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fb;color:var(--ink);font-family:Arial,"Malgun Gothic",sans-serif;line-height:1.65}
+header{padding:26px 15px;background:linear-gradient(120deg,#172b51,#536bcb);color:white;text-align:center}
+header h1{margin:0;font-size:30px}
+header p{margin:4px}
+main{max-width:1050px;margin:20px auto 70px;padding:0 14px}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:23px;margin:16px 0;box-shadow:0 3px 12px #1c32500b}
+h2{color:var(--navy);font-size:23px;margin:0 0 12px}
+h3{color:#344c83;font-size:18px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 15px;background:var(--blue);color:white;font-weight:bold}
+button:hover{filter:brightness(.94)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.secondary{background:#e9edfb;color:#28427e}
+.outline{background:white;color:#344f9b;border:1px solid #bdc9e7}
+.tabs,.actions,.options{display:flex;flex-wrap:wrap;gap:9px}
+.tabs button{flex:1;min-width:125px}
+.tabs button.active{background:#182b51}
+.panel{display:none}
+.panel.active{display:block}
+.progress{height:9px;background:#e3e8f4;border-radius:20px;overflow:hidden;margin:13px 0}
+.progress div{height:100%;width:20%;background:#4d72df;transition:width .25s}
+label{display:block;font-weight:bold;margin:14px 0 6px}
+input,textarea{width:100%;font:inherit;border:1px solid #bdc9dc;border-radius:9px;padding:10px;background:white}
+textarea{min-height:90px;resize:vertical}
+.story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.story-choice{background:#f5f7ff;color:#223b70;border:2px solid transparent;padding:0;overflow:hidden;text-align:left}
+.story-choice.selected{border-color:#4b65db;background:#eaf0ff}
+.story-choice strong{display:block;padding:10px 12px 0;font-size:16px}
+.story-choice small{display:block;padding:0 12px 12px;color:#66758f;font-weight:normal}
+.art{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.hero{display:grid;grid-template-columns:230px 1fr;align-items:center;gap:20px;margin-bottom:17px}
+.hero .art{border-radius:13px}
+.reading{background:#f9fbff;border-left:5px solid #657ee1;border-radius:10px;padding:19px;font-size:17px;line-height:2.05}
+.reading p{margin:0 0 15px}
+.target{background:#fff0a8;border-radius:5px;padding:3px 5px;cursor:pointer;box-decoration-break:clone}
+.target:hover,.target:focus{background:#ffda66}
+.note{background:#fff8e8;border-left:4px solid #e5b342;border-radius:8px;padding:13px;margin:15px 0}
+.example{background:#edf2ff;border-radius:11px;padding:15px;margin:12px 0}
+.structure{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.structure>div{background:#edf2ff;padding:17px;border-radius:12px;text-align:center}
+.structure b{color:#3554b6}
+.good{color:var(--green);font-weight:bold}
+.bad{color:var(--red);font-weight:bold}
+.muted{color:#6b7890;font-size:13px}
+.translation{background:#edf2ff;border-radius:12px;padding:19px;font-size:19px;font-weight:bold;margin:15px 0}
+.answer-area{min-height:80px;background:#fafbff;border:2px dashed #a5b5e1;border-radius:12px;padding:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wordbank{display:flex;gap:9px;flex-wrap:wrap;margin:15px 0}
+.word{background:white;color:#28427f;border:1px solid #b3c1e3;padding:9px 13px;box-shadow:0 2px 0 #d9e0f1}
+.word.selected-word{background:#dfe8ff}
+.word:disabled{opacity:.3}
+.hint{background:#fff8e8;border-left:4px solid #dca53e;padding:11px 14px;border-radius:7px;margin:8px 0}
+.question{padding:15px;border:1px solid var(--line);border-radius:12px;margin:13px 0}
+.options button{background:#eaf0ff;color:#243d79}
+.options button.chosen{background:#405ab4;color:white}
+.output{white-space:pre-wrap;background:#f7f9ff;border:1px solid #dce3f1;border-radius:12px;padding:19px}
+#notice{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#20365e;color:white;padding:10px 20px;border-radius:10px;display:none;z-index:20}
+@media(max-width:700px){
+ .story-grid{grid-template-columns:repeat(2,1fr)}
+ .hero,.structure{grid-template-columns:1fr}
+ .hero .art{max-width:270px;margin:auto}
+ .card{padding:16px}
+ .reading{font-size:15px}
+ header h1{font-size:25px}
+ .translation{font-size:17px}
+}
+@media print{
+ header,.nav,.actions,.story-grid,.no-print{display:none!important}
+ body{background:white}
+ .card{box-shadow:none}
+ .panel{display:none!important}
+ #step4{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>✨ WHAT IF? STORY LAB</h1>
+<p>Change a Choice. Rewrite the Story.</p>
+<p>중학교 3학년 | 가정법 과거 | Story-Based Learning</p>
+</header>
+
+<main>
+<div class="card nav">
+<label for="student">Student Name</label>
+<input id="student" placeholder="학생 이름">
+<div class="progress"><div id="progress"></div></div>
+<div class="tabs">
+<button id="tab0" class="active" onclick="go(0)">1. Story</button>
+<button id="tab1" onclick="go(1)">2. Grammar</button>
+<button id="tab2" onclick="go(2)">3. Builder</button>
+<button id="tab3" onclick="go(3)">4. Challenge</button>
+<button id="tab4" onclick="go(4)">5. Rewrite</button>
+</div>
+</div>
+
+<section id="step0" class="panel active">
+<div class="card">
+<h2>📚 Step 1. Choose Your Story</h2>
+<p>Choose a character and read the story.</p>
+<div id="storyGrid" class="story-grid">
+<button onclick="choose(0)">👠 Cinderella</button>
+<button onclick="choose(1)">🐺 Little Red Riding Hood</button>
+<button onclick="choose(2)">🍎 Snow White</button>
+<button onclick="choose(3)">🧜‍♀️ The Little Mermaid</button>
+<button onclick="choose(4)">🐦 Heungbu and Nolbu</button>
+<button onclick="choose(5)">👑 King Yeongjo</button>
+</div>
+</div>
+<div class="card">
+<div class="hero">
+<div id="heroArt"></div>
+<div>
+<h2 id="storyTitle">Cinderella</h2>
+<p id="storyIntro">A girl dreams of a different life.</p>
+</div>
+</div>
+<div id="reading" class="reading">
+<p>Cinderella lives with her stepmother and two stepsisters. They make her do all the housework.</p>
+<p>One evening, everyone is invited to a royal ball. Cinderella wants to go, but her stepmother refuses.</p>
+<p>A fairy godmother helps her. At the ball, Cinderella meets the prince.</p>
+<p><span class="target">If I were Cinderella, I would stand up for myself.</span></p>
+<p><span class="target">If I had a magic wand, I could change my life.</span></p>
+</div>
+<p class="note">노란색 문장을 클릭해 가정법 과거의 의미를 확인하세요.</p>
+<div id="meaning" class="example" hidden></div>
+<div class="actions">
+<button onclick="go(1)">Next: Grammar Lab →</button>
+</div>
+</div>
+</section>
+
+<section id="step1" class="panel">
+<div class="card">
+<h2>🧠 Step 2. Grammar Lab</h2>
+<p>가정법 과거는 현재 사실과 반대되거나 실현 가능성이 낮은 상황을 상상할 때 사용합니다.</p>
+<div class="structure">
+<div>
+<b>IF CLAUSE</b>
+<p>If + 주어 + 동사의 과거형</p>
+<small>만약 ~라면</small>
+</div>
+<div>
+<b>MAIN CLAUSE</b>
+<p>주어 + would/could/might + 동사원형</p>
+<small>~할 텐데</small>
+</div>
+</div>
+<div class="example">
+<b>If I were Cinderella, I would leave the house.</b>
+<p>내가 신데렐라라면, 그 집을 떠날 텐데.</p>
+</div>
+<h3>Rule 1. If절에는 과거형</h3>
+<div class="example">
+If I <b>had</b> a magic wand, I would help others.<br>
+If I <b>knew</b> the truth, I would tell her.
+</div>
+<h3>Rule 2. would + 동사원형</h3>
+<div class="example">
+<span class="good">✓</span> I would <b>go</b> home.<br>
+<span class="bad">✗</span> I would <b>went</b> home.<br>
+<span class="bad">✗</span> I would <b>gone</b> home.
+</div>
+<h3>Rule 3. If I were ...</h3>
+<p>학교 문법에서는 가정법 과거의 be동사로 주어에 관계없이 <b>were</b>를 사용하는 형태를 기본으로 학습합니다.</p>
+<h3>Rule 4. would / could / might</h3>
+<div class="example">
+<b>would</b> — ~할 텐데<br>
+<b>could</b> — ~할 수 있을 텐데<br>
+<b>might</b> — ~할지도 모르는데
+</div>
+<h3>Rule 5. 동사의 형태 비교</h3>
+<div class="example">
+<table style="width:100%;text-align:center">
+<tr><th>원형</th><th>과거형</th><th>과거분사</th></tr>
+<tr><td>go</td><td>went</td><td>gone</td></tr>
+<tr><td>see</td><td>saw</td><td>seen</td></tr>
+<tr><td>know</td><td>knew</td><td>known</td></tr>
+<tr><td>give</td><td>gave</td><td>given</td></tr>
+<tr><td>be</td><td>was/were</td><td>been</td></tr>
+</table>
+</div>
+<div class="note">
+이미 일어난 과거 사건을 바꾸어 상상할 때는 가정법 과거완료를 사용합니다. 이번 활동은 현재 인물의 역할을 맡는 상황을 중심으로 연습합니다.
+</div>
+<h3>Grammar in Your Story</h3>
+<div id="grammarExamples"></div>
+<div class="actions">
+<button class="secondary" onclick="go(0)">← Back</button>
+<button onclick="go(2)">Next: Sentence Builder →</button>
+</div>
+</div>
+</section>
+
+<section id="step2" class="panel">
+<div class="card">
+<h2>🧩 Step 3. Sentence Builder</h2>
+<p>우리말을 보고 단어를 순서대로 클릭하여 문장을 완성하세요.</p>
+<div class="note">동사의 원형·과거형·과거분사형이 섞여 있습니다. 필요하지 않은 단어도 있습니다!</div>
+<h3 id="builderCount">Question 1 / 3</h3>
+<div id="translation" class="translation"></div>
+<p><b>Your Sentence</b></p>
+<div id="answerArea" class="answer-area"></div>
+<p><b>Word Bank</b></p>
+<div id="wordBank" class="wordbank"></div>
+<div class="actions">
+<button onclick="checkBuilder()">Check Answer ✓</button>
+<button class="secondary" onclick="undoWord()">Undo ↶</button>
+<button class="outline" onclick="clearWords()">Clear</button>
+</div>
+<div id="builderFeedback" aria-live="polite"></div>
+<div id="hints"></div>
+<div class="actions" style="margin-top:20px">
+<button class="secondary" onclick="changeQuestion(-1)">← Previous</button>
+<button class="secondary" onclick="changeQuestion(1)">Next →</button>
+<button onclick="go(3)">Grammar Challenge →</button>
+</div>
+</div>
+</section>
+
+<section id="step3" class="panel">
+<div class="card">
+<h2>🎯 Step 4. Grammar Challenge</h2>
+<div id="quiz"></div>
+<div id="score" class="example"></div>
+<div class="actions">
+<button class="secondary" onclick="resetQuiz()">Try Again</button>
+<button onclick="go(4)">Next: Rewrite the Story →</button>
+</div>
+</div>
+</section>
+
+<section id="step4" class="panel">
+<div class="card">
+<h2>✍️ Step 5. Rewrite the Story</h2>
+<div class="hero">
+<div id="rewriteArt"></div>
+<div>
+<h3 id="missionTitle"></h3>
+<p id="mission"></p>
+</div>
+</div>
+<div class="note">가정법 과거 문장 3개 이상을 만들고 새로운 결말을 영어로 작성하세요.</div>
+<label>1. If I were ...</label>
+<textarea id="write1"></textarea>
+<label>2. If I could ...</label>
+<textarea id="write2"></textarea>
+<label>3. If ...</label>
+<textarea id="write3"></textarea>
+<label>4. My New Ending (3–5 sentences)</label>
+<textarea id="ending" style="min-height:150px"></textarea>
+<p id="wordCount" class="muted"></p>
+<div class="actions">
+<button onclick="checkWriting()">Check My Writing</button>
+<button class="secondary" onclick="makeBook()">Create My Storybook</button>
+</div>
+<div id="writingFeedback" class="example" hidden></div>
+</div>
+<div class="card">
+<h2>📖 My Storybook</h2>
+<div id="storybook" class="output">Your story will appear here.</div>
+<div class="actions no-print">
+<button onclick="copyStory()">Copy Story</button>
+<button class="secondary" onclick="window.print()">Print / PDF</button>
+<button class="outline" onclick="saveText()">Save as TXT</button>
+</div>
+</div>
+</section>
+</main>
+<div id="notice"></div>
+
+<script>
+"use strict";
+
+const $=id=>document.getElementById(id);
+const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[c]));
+
+function makeProblem(ko,en,extras,hints){
+return {ko,en,extras,hints};
+}
+
+const stories=[
+{
+id:"cinderella",title:"Cinderella",subtitle:"The Glass Slipper",
+intro:"A girl dreams of freedom and a different life.",
+paragraphs:[
+"Cinderella lives with her stepmother and two stepsisters. They make her do all the housework.",
+"One evening, everyone is invited to a royal ball. Cinderella wants to go, but her stepmother refuses.",
+"A fairy godmother helps her. At the ball, Cinderella meets the prince. She must leave before midnight and loses a glass slipper.",
+"Now imagine that Cinderella could make her own choices."
+],
+examples:[
+["If I were Cinderella, I would stand up for myself.","내가 신데렐라라면, 나 자신을 위해 당당히 맞설 텐데."],
+["If I had a magic wand, I could change my life.","내게 마법 지팡이가 있다면, 내 삶을 바꿀 수 있을 텐데."],
+["If I were the prince, I would ask Cinderella about her dreams.","내가 왕자라면, 신데렐라에게 꿈에 대해 물어볼 텐데."]
+],
+mission:"Would you go to the ball? Would you marry the prince or choose another future?",
+starter:"If I were Cinderella, I would ...",
+problems:[
+makeProblem("내가 신데렐라라면, 나는 무도회에 갈 텐데.",
+"If I were Cinderella , I would go to the ball .",
+["am","was","been","went","gone","going","will"],
+["If + 주어 + 과거형, 주어 + would + 동사원형",
+"be동사는 were, would 뒤에는 go가 필요합니다.",
+"If I were Cinderella, I would ..."]),
+makeProblem("내게 마법 지팡이가 있다면, 나는 내 삶을 바꿀 수 있을 텐데.",
+"If I had a magic wand , I could change my life .",
+["have","has","having","changed","changes","will"],
+["If절에 have의 과거형을 사용하세요.",
+"have → had / could + change",
+"If I had a magic wand, I could ..."]),
+makeProblem("내가 왕자라면, 나는 신데렐라를 도울 텐데.",
+"If I were the prince , I would help Cinderella .",
+["am","was","been","helped","helping","helps","will"],
+["If I were ... 구조를 사용하세요.",
+"would 뒤에는 help가 필요합니다.",
+"If I were the prince, I would ..."])
+]
+},
+{
+id:"red",title:"Little Red Riding Hood",subtitle:"The Girl and the Wolf",
+intro:"A girl meets a wolf on her way to her grandmother.",
+paragraphs:[
+"Little Red Riding Hood walks through the forest to visit her grandmother. Her mother tells her to stay on the path.",
+"A wolf asks where she is going. She tells him about her grandmother's house.",
+"The wolf reaches the house first and pretends to be her grandmother. The girl notices something strange.",
+"What would you do if you were the girl?"
+],
+examples:[
+["If I were Little Red Riding Hood, I would not trust the wolf.","내가 빨간 모자라면, 늑대를 믿지 않을 텐데."],
+["If I saw a strange wolf, I would run away.","내가 낯선 늑대를 본다면, 도망칠 텐데."],
+["If I were the wolf, I might choose to be kind.","내가 늑대라면, 친절해지기로 선택할지도 몰라."]
+],
+mission:"Would you talk to the wolf? Could the wolf become a friend?",
+starter:"If I were Little Red Riding Hood, I would ...",
+problems:[
+makeProblem("내가 빨간 모자라면, 나는 늑대를 믿지 않을 텐데.",
+"If I were Little Red Riding Hood , I would not trust the wolf .",
+["am","was","been","trusted","trusting","will"],
+["would not + 동사원형 구조를 사용하세요.",
+"would not trust가 필요합니다.",
+"If I were Little Red Riding Hood, I would not ..."]),
+makeProblem("내가 늑대를 본다면, 나는 도망칠 텐데.",
+"If I saw the wolf , I would run away .",
+["see","seen","seeing","ran","running","will"],
+["If절에는 see의 과거형을 사용하세요.",
+"see → saw / would + run",
+"If I saw the wolf, I would ..."]),
+makeProblem("내가 늑대라면, 나는 친절해지기로 선택할지도 몰라.",
+"If I were the wolf , I might choose to be kind .",
+["am","was","been","chose","chosen","choosing","would"],
+["might 뒤에는 동사원형이 옵니다.",
+"choose / chose / chosen 중 choose가 필요합니다.",
+"If I were the wolf, I might choose ..."])
+]
+},
+{
+id:"snow",title:"Snow White",subtitle:"The Poisoned Apple",
+intro:"A princess faces danger because of a jealous queen.",
+paragraphs:[
+"Snow White is a kind princess. Her stepmother, the queen, becomes jealous of her beauty.",
+"Snow White escapes into the forest and finds a small house. Seven dwarfs welcome her.",
+"The queen disguises herself as an old woman and offers Snow White a poisoned apple.",
+"Imagine that Snow White and the queen could make different choices."
+],
+examples:[
+["If I were Snow White, I would be more careful with strangers.","내가 백설공주라면, 낯선 사람들을 더 조심할 텐데."],
+["If I were the queen, I would stop comparing myself with others.","내가 왕비라면, 남과 나를 비교하지 않을 텐데."],
+["If I had seven good friends, I would listen to their advice.","내게 좋은 친구 일곱 명이 있다면, 그들의 조언을 들을 텐데."]
+],
+mission:"Would you accept the apple? What if the queen changed her attitude?",
+starter:"If I were Snow White, I would ...",
+problems:[
+makeProblem("내가 백설공주라면, 나는 그 사과를 먹지 않을 텐데.",
+"If I were Snow White , I would not eat the apple .",
+["am","was","been","ate","eaten","eating","will"],
+["would not + 동사원형 구조입니다.",
+"eat / ate / eaten 중 eat를 사용하세요.",
+"If I were Snow White, I would not ..."]),
+makeProblem("내가 왕비라면, 나는 다른 사람들을 도울 텐데.",
+"If I were the queen , I would help others .",
+["am","was","been","helped","helping","helps","will"],
+["If I were ... 구조를 사용하세요.",
+"would 뒤에는 help가 필요합니다.",
+"If I were the queen, I would ..."]),
+makeProblem("내가 진실을 안다면, 나는 친구들에게 말할 텐데.",
+"If I knew the truth , I would tell my friends .",
+["know","known","knowing","told","telling","will"],
+["know의 과거형을 생각하세요.",
+"know → knew / would + tell",
+"If I knew the truth, I would ..."])
+]
+},
+{
+id:"mermaid",title:"The Little Mermaid",subtitle:"A Voice and a Dream",
+intro:"A mermaid wishes to experience life on land.",
+paragraphs:[
+"A young mermaid lives under the sea. She is curious about the human world and dreams of living on land.",
+"She meets a prince and wants to see him again.",
+"A sea witch offers her a chance to become human, but the price is her beautiful voice.",
+"The mermaid must decide what matters most to her."
+],
+examples:[
+["If I were the little mermaid, I would keep my voice.","내가 인어공주라면, 내 목소리를 지킬 텐데."],
+["If I could live on land, I would explore the world.","내가 육지에서 살 수 있다면, 세상을 탐험할 텐데."],
+["If I were the prince, I would try to understand her feelings.","내가 왕자라면, 그녀의 감정을 이해하려고 노력할 텐데."]
+],
+mission:"Would you give up your voice? Would you choose love, freedom, or family?",
+starter:"If I were the little mermaid, I would ...",
+problems:[
+makeProblem("내가 인어공주라면, 나는 내 목소리를 지킬 텐데.",
+"If I were the little mermaid , I would keep my voice .",
+["am","was","been","kept","keeping","keeps","will"],
+["would 뒤에는 동사원형이 필요합니다.",
+"keep / kept 중 keep가 필요합니다.",
+"If I were the little mermaid, I would ..."]),
+makeProblem("내가 육지에서 살 수 있다면, 나는 세상을 탐험할 텐데.",
+"If I could live on land , I would explore the world .",
+["can","lived","living","explored","exploring","will"],
+["can의 가정법 형태를 생각하세요.",
+"could live / would explore",
+"If I could live on land, I would ..."]),
+makeProblem("내가 왕자라면, 나는 그녀의 감정을 이해할 텐데.",
+"If I were the prince , I would understand her feelings .",
+["am","was","been","understood","understanding","will"],
+["If I were ... 구조를 사용하세요.",
+"would + understand",
+"If I were the prince, I would ..."])
+]
+},
+{
+id:"heungbu",title:"Heungbu and Nolbu",subtitle:"Two Brothers",
+intro:"A Korean folktale about kindness and greed.",
+paragraphs:[
+"Heungbu and Nolbu are brothers. Heungbu is poor but kind, while Nolbu is rich and selfish.",
+"One day, Heungbu helps an injured swallow. Later, the swallow brings him a special seed.",
+"Heungbu plants the seed and receives wonderful gifts.",
+"Nolbu hears about his brother's good fortune and tries to get the same reward."
+],
+examples:[
+["If I were Heungbu, I would share my good fortune.","내가 흥부라면, 행운을 나눌 텐데."],
+["If I were Nolbu, I would help my brother.","내가 놀부라면, 동생을 도울 텐데."],
+["If I had a magic seed, I would use it to help others.","내게 마법 씨앗이 있다면, 다른 사람들을 돕는 데 사용할 텐데."]
+],
+mission:"Would you forgive Nolbu? What if Nolbu decided to be generous?",
+starter:"If I were Nolbu, I would ...",
+problems:[
+makeProblem("내가 놀부라면, 나는 동생을 도울 텐데.",
+"If I were Nolbu , I would help my brother .",
+["am","was","been","helped","helping","helps","will"],
+["내가 놀부라는 가상의 상황입니다.",
+"If I were / I would help",
+"If I were Nolbu, I would ..."]),
+makeProblem("내게 마법 씨앗이 있다면, 나는 그것을 나눌 텐데.",
+"If I had a magic seed , I would share it .",
+["have","has","having","shared","sharing","will"],
+["have의 과거형이 필요합니다.",
+"had / would share",
+"If I had a magic seed, I would ..."]),
+makeProblem("내가 부자라면, 나는 가난한 사람들에게 돈을 줄 텐데.",
+"If I were rich , I would give money to poor people .",
+["am","was","been","gave","given","giving","will"],
+["give의 원형과 과거형을 구별하세요.",
+"would give가 맞습니다.",
+"If I were rich, I would give ..."])
+]
+},
+{
+id:"yeongjo",title:"King Yeongjo",subtitle:"A Choice in the Palace",
+intro:"A historical role-play inspired by King Yeongjo and Crown Prince Sado.",
+paragraphs:[
+"King Yeongjo ruled Joseon for many years. His relationship with Crown Prince Sado was troubled and complicated.",
+"The king faced difficult questions about family, royal authority, and responsibility.",
+"Their conflict became a tragic part of Korean history.",
+"Imagine that you are a king facing a similar conflict today. What kind of ruler would you be?"
+],
+examples:[
+["If I were King Yeongjo, I would listen to my son more carefully.","내가 영조라면, 아들의 이야기를 더 주의 깊게 들을 텐데."],
+["If I were the crown prince, I would ask for help.","내가 세자라면, 도움을 요청할 텐데."],
+["If I had great power, I would use it responsibly.","내게 큰 권력이 있다면, 책임감 있게 사용할 텐데."]
+],
+mission:"Imagine you are a king facing a family conflict. How would you communicate with your son?",
+starter:"If I were King Yeongjo, I would ...",
+problems:[
+makeProblem("내가 영조라면, 나는 아들의 이야기를 들을 텐데.",
+"If I were King Yeongjo , I would listen to my son .",
+["am","was","been","listened","listening","will"],
+["If I were ... 구조를 사용하세요.",
+"would listen to가 필요합니다.",
+"If I were King Yeongjo, I would ..."]),
+makeProblem("내가 세자라면, 나는 도움을 요청할 텐데.",
+"If I were the crown prince , I would ask for help .",
+["am","was","been","asked","asking","will"],
+["would 뒤에는 동사원형입니다.",
+"ask / asked 중 ask가 필요합니다.",
+"If I were the crown prince, I would ..."]),
+makeProblem("내게 큰 권력이 있다면, 나는 그것을 현명하게 사용할 텐데.",
+"If I had great power , I would use it wisely .",
+["have","has","having","used","using","will"],
+["have의 과거형을 사용하세요.",
+"had / would use",
+"If I had great power, I would ..."])
+]
+}
+];
+
+/*
+SVG character portraits.
+These are generated entirely inside this file.
+No image URLs are needed.
+*/
+function artSVG(id){
+const palettes={
+cinderella:["#dceaff","#b0c4f2"],
+red:["#dff2d5","#a8d6ad"],
+snow:["#e3eaff","#b6c6ee"],
+mermaid:["#d5f5f5","#80ced5"],
+heungbu:["#f7e8c6","#dfc08b"],
+yeongjo:["#e9e5f4","#bdb4d9"]
+};
+const p=palettes[id]||palettes.cinderella;
+const face=(x,y)=>`
+<ellipse cx="${x}" cy="${y}" rx="40" ry="47" fill="#f3c6a5"/>
+<circle cx="${x-14}" cy="${y}" r="3.2" fill="#393345"/>
+<circle cx="${x+14}" cy="${y}" r="3.2" fill="#393345"/>
+<path d="M${x-9} ${y+18} Q${x} ${y+25} ${x+9} ${y+18}" fill="none" stroke="#ad6970" stroke-width="2.5"/>`;
+let shape="";
+switch(id){
+case "cinderella":
+shape=`
+<path d="M145 120 Q132 43 200 42 Q270 44 253 128L242 177H155Z" fill="#a77b52"/>
+<path d="M165 165L125 277Q200 305 275 277L235 165Z" fill="#77a9df"/>
+<path d="M166 170L129 224M234 170L269 224" stroke="#f3c6a5" stroke-width="14" stroke-linecap="round"/>
+${face(200,113)}
+<path d="M157 93Q164 45 205 51Q244 54 244 94Q216 74 199 81Q179 86 157 93" fill="#a77b52"/>
+<path d="M177 60Q200 40 224 60" fill="none" stroke="#dbeaff" stroke-width="11"/>
+<path d="M190 49L200 30L210 49Z" fill="#fff0ac"/>
+<path d="M69 241Q92 210 119 241Q95 257 69 241Z" fill="#e5f4ff" stroke="#7ca8d9" stroke-width="3"/>
+<path d="M94 231L110 213" stroke="#fff" stroke-width="4"/>
+<path d="M310 85v30M295 100h30" stroke="#fff5b3" stroke-width="4"/>`;
+break;
+case "red":
+shape=`
+<path d="M0 255Q90 215 200 250T400 250V300H0Z" fill="#84b98b"/>
+<path d="M148 118Q143 44 200 40Q258 44 254 125L243 182H157Z" fill="#b83f4b"/>
+<path d="M164 168L130 275Q200 298 270 275L236 168Z" fill="#d84a58"/>
+<path d="M164 170L132 221M236 170L266 221" stroke="#f3c6a5" stroke-width="14" stroke-linecap="round"/>
+${face(200,113)}
+<path d="M154 96Q161 48 200 48Q240 50 247 96" fill="none" stroke="#e95862" stroke-width="18"/>
+<rect x="250" y="209" width="46" height="37" rx="7" fill="#bf8b57" stroke="#81583e" stroke-width="3"/>
+<path d="M259 210Q273 183 287 210" fill="none" stroke="#81583e" stroke-width="4"/>
+<ellipse cx="338" cy="230" rx="37" ry="30" fill="#77716b"/>
+<path d="M310 210L317 177L330 205M344 205L361 177L367 216" fill="#77716b"/>
+<circle cx="325" cy="222" r="3" fill="#fff"/>
+<circle cx="350" cy="222" r="3" fill="#fff"/>
+<ellipse cx="338" cy="238" rx="9" ry="6" fill="#34343a"/>`;
+break;
+case "snow":
+shape=`
+<path d="M148 119Q140 44 200 42Q261 45 253 128L244 185H156Z" fill="#29304c"/>
+<path d="M166 165L125 275Q200 305 275 275L234 165Z" fill="#f0c953"/>
+<path d="M167 165L132 218M233 165L268 218" stroke="#f3c6a5" stroke-width="14" stroke-linecap="round"/>
+<path d="M164 165Q200 184 236 165L228 202H172Z" fill="#4778bc"/>
+${face(200,112)}
+<path d="M154 94Q157 45 201 47Q244 47 246 94Q220 76 201 80Q175 79 154 94" fill="#29304c"/>
+<path d="M158 77Q200 56 242 77" fill="none" stroke="#cf4658" stroke-width="10"/>
+<path d="M192 62L201 46L211 62L201 72Z" fill="#e34b5d"/>
+<circle cx="318" cy="217" r="30" fill="#d7444c"/>
+<path d="M317 189Q311 170 326 163" fill="none" stroke="#7c5a3e" stroke-width="5"/>
+<path d="M318 188Q342 169 351 190Q333 198 318 188" fill="#5b9e61"/>`;
+break;
+case "mermaid":
+shape=`
+<path d="M0 243Q50 225 100 243T200 243T300 243T400 243V300H0Z" fill="#51b4c5" opacity=".65"/>
+<path d="M170 185Q140 219 166 258Q180 277 166 292Q213 283 228 254Q249 216 229 185Z" fill="#43bfa9"/>
+<path d="M173 272Q134 259 122 281Q158 307 194 288M205 273Q251 258 268 284Q231 308 194 288" fill="#43bfa9"/>
+<path d="M172 183Q200 171 228 183L225 218Q200 233 175 218Z" fill="#8e6dbd"/>
+<path d="M173 189L136 229M227 189L261 225" stroke="#f3c6a5" stroke-width="14" stroke-linecap="round"/>
+<path d="M150 121Q138 43 200 39Q261 44 251 130L264 179H136Z" fill="#aa655e"/>
+${face(200,112)}
+<path d="M155 94Q159 48 200 49Q244 50 246 96Q220 74 199 80Q173 79 155 94" fill="#aa655e"/>
+<path d="M159 111Q144 154 150 180M242 111Q260 155 250 180" fill="none" stroke="#aa655e" stroke-width="16"/>
+<circle cx="77" cy="126" r="10" fill="none" stroke="#fff" stroke-width="3"/>
+<circle cx="97" cy="91" r="6" fill="none" stroke="#fff" stroke-width="2"/>
+<circle cx="310" cy="161" r="11" fill="none" stroke="#fff" stroke-width="3"/>
+<path d="M294 245Q319 223 345 245Q320 267 294 245Z" fill="#f1cf7a"/>
+<path d="M344 245L363 228V262Z" fill="#f1cf7a"/>`;
+break;
+case "heungbu":
+shape=`
+<path d="M0 252Q90 225 200 250T400 250V300H0Z" fill="#a2ba87"/>
+<path d="M118 173L105 270Q155 287 207 270L190 173Z" fill="#e6d5a7"/>
+<path d="M121 174L92 226M190 174L214 226" stroke="#d2a17f" stroke-width="13" stroke-linecap="round"/>
+<ellipse cx="157" cy="111" rx="41" ry="47" fill="#d9ad8a"/>
+<path d="M115 94Q121 53 158 52Q197 54 199 95Z" fill="#32343b"/>
+<path d="M110 74H204L194 59H121Z" fill="#32343b"/>
+<circle cx="143" cy="111" r="3" fill="#333"/>
+<circle cx="173" cy="111" r="3" fill="#333"/>
+<path d="M148 132Q158 140 168 132" stroke="#915f58" stroke-width="2.5" fill="none"/>
+<path d="M219 173L205 270Q262 288 315 270L300 173Z" fill="#6e84b5"/>
+<path d="M222 174L193 226M299 174L329 226" stroke="#d2a17f" stroke-width="13" stroke-linecap="round"/>
+<ellipse cx="260" cy="111" rx="41" ry="47" fill="#d9ad8a"/>
+<path d="M218 94Q225 53 260 52Q297 54 303 94Z" fill="#32343b"/>
+<path d="M213 74H307L298 59H222Z" fill="#32343b"/>
+<circle cx="246" cy="111" r="3" fill="#333"/>
+<circle cx="276" cy="111" r="3" fill="#333"/>
+<path d="M251 135Q260 130 270 135" stroke="#915f58" stroke-width="2.5" fill="none"/>
+<path d="M50 96Q73 76 97 96Q73 114 50 96Z" fill="#526e9f"/>
+<path d="M96 96L114 81V111Z" fill="#526e9f"/>`;
+break;
+case "yeongjo":
+shape=`
+<path d="M140 170L107 276Q200 303 293 276L260 170Z" fill="#ba3e4b"/>
+<path d="M141 176L111 227M259 176L289 227" stroke="#d6a688" stroke-width="15" stroke-linecap="round"/>
+<path d="M172 174L171 274M228 174L229 274" stroke="#e2bd64" stroke-width="6"/>
+<circle cx="200" cy="220" r="25" fill="none" stroke="#e6c76c" stroke-width="5"/>
+<ellipse cx="200" cy="112" rx="43" ry="49" fill="#d9ad8d"/>
+<path d="M157 98Q160 58 200 56Q240 58 243 98Z" fill="#30333d"/>
+<path d="M151 76H249L238 56H162Z" fill="#282b34"/>
+<path d="M175 56L183 29H217L225 56Z" fill="#282b34"/>
+<path d="M183 31H217M170 75H230" stroke="#d5b36d" stroke-width="4"/>
+<circle cx="184" cy="112" r="3.5" fill="#333"/>
+<circle cx="216" cy="112" r="3.5" fill="#333"/>
+<path d="M190 134Q200 139 210 134" stroke="#76564d" stroke-width="2.5" fill="none"/>
+<path d="M181 145Q200 163 219 145" fill="#30333d"/>
+<path d="M67 185V105H86V185M55 185H99M55 105H99" fill="none" stroke="#84716e" stroke-width="8"/>
+<path d="M52 105L77 76L102 105Z" fill="#7184a6"/>
+<path d="M314 185V105H333V185M301 185H347M301 105H347" fill="none" stroke="#84716e" stroke-width="8"/>
+<path d="M298 105L323 76L348 105Z" fill="#7184a6"/>`;
+break;
+}
+return `
+<svg class="art" xmlns="http://www.w3.org/2000/svg"
+viewBox="0 0 400 300" role="img"
+aria-label="${escapeHTML(id)} illustration">
+<defs>
+<linearGradient id="gradient-${id}" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="${p[0]}"/>
+<stop offset="100%" stop-color="${p[1]}"/>
+</linearGradient>
+</defs>
+<rect width="400" height="300" fill="url(#gradient-${id})"/>
+<circle cx="340" cy="50" r="30" fill="white" opacity=".35"/>
+<circle cx="55" cy="55" r="20" fill="white" opacity=".25"/>
+<ellipse cx="200" cy="281" rx="135" ry="13" fill="#506080" opacity=".13"/>
+${shape}
+</svg>`;
+}
+
+let selected=0;
+let currentStep=0;
+let builderIndex=0;
+let builder=null;
+let builderTimer=null;
+let quizAnswers={};
+let completed={};
+
+function currentStory(){return stories[selected]}
+function words(s){return s.trim().split(/\s+/)}
+function shuffle(a){
+a=[...a];
+for(let i=a.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
+}
+function notify(message){
+const n=$("notice");
+n.textContent=message;
+n.style.display="block";
+clearTimeout(window.noticeTimer);
+window.noticeTimer=setTimeout(()=>n.style.display="none",2000);
+}
+function go(n){
+currentStep=n;
+for(let i=0;i<5;i++){
+$("step"+i).classList.toggle("active",i===n);
+$("tab"+i).classList.toggle("active",i===n);
+}
+$("progress").style.width=((n+1)*20)+"%";
+if(n===2)renderBuilder();
+window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderStories(){
+$("storyGrid").innerHTML=stories.map((s,i)=>`
+<button class="story-choice ${i===selected?'selected':''}"
+onclick="choose(${i})">
+${artSVG(s.id)}
+<strong>${escapeHTML(s.title)}</strong>
+<small>${escapeHTML(s.subtitle)}</small>
+</button>`).join("");
+}
+function choose(i){
+saveWriting();
+clearTimeout(builderTimer);
+selected=i;
+builderIndex=0;
+builder=null;
+completed={};
+quizAnswers={};
+renderAll();
+go(0);
+}
+function renderStory(){
+const s=currentStory();
+$("heroArt").innerHTML=artSVG(s.id);
+$("rewriteArt").innerHTML=artSVG(s.id);
+$("storyTitle").textContent=s.title;
+$("storyIntro").textContent=s.intro;
+$("reading").innerHTML=s.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join("")+
+"<p><b>What if...?</b></p>"+
+s.examples.map((e,i)=>`
+<p><span class="target" role="button" tabindex="0"
+onclick="showMeaning(${i})"
+onkeydown="if(event.key==='Enter')showMeaning(${i})">${escapeHTML(e[0])}</span></p>`).join("");
+$("meaning").hidden=true;
+$("grammarExamples").innerHTML=s.examples.map((e,i)=>`
+<div class="example"><b>${i+1}. ${escapeHTML(e[0])}</b>
+<p>${escapeHTML(e[1])}</p></div>`).join("");
+$("missionTitle").textContent=s.title;
+$("mission").textContent=s.mission;
+$("write1").placeholder=s.starter;
+}
+function showMeaning(i){
+$("meaning").hidden=false;
+$("meaning").textContent=currentStory().examples[i][1];
+}
+
+/* Sentence Builder */
+function createBuilder(){
+clearTimeout(builderTimer);
+const q=currentStory().problems[builderIndex];
+const bank=shuffle([...words(q.en),...q.extras]);
+builder={
+cards:bank.map((word,id)=>({id,word})),
+chosen:[],
+errors:0,
+solved:false
+};
+renderBuilder();
+}
+function renderBuilder(){
+if(!builder){createBuilder();return}
+const q=currentStory().problems[builderIndex];
+$("builderCount").textContent=
+`Question ${builderIndex+1} / ${currentStory().problems.length}`;
+$("translation").textContent=q.ko;
+renderCards();
+}
+function renderCards(){
+const s=builder;
+$("answerArea").innerHTML=s.chosen.length?
+s.chosen.map((id,i)=>{
+const c=s.cards.find(x=>x.id===id);
+return `<button class="word selected-word" onclick="removeWord(${i})"
+${s.solved?'disabled':''}>${escapeHTML(c.word)} ↶</button>`;
+}).join(""):
+'<span class="muted">단어 카드를 순서대로 클릭하세요.</span>';
+$("wordBank").innerHTML=s.cards.map(c=>`
+<button class="word" onclick="addWord(${c.id})"
+${s.chosen.includes(c.id)||s.solved?'disabled':''}>${escapeHTML(c.word)}</button>`).join("");
+}
+function addWord(id){
+if(builder.solved||builder.chosen.includes(id))return;
+builder.chosen.push(id);
+$("builderFeedback").textContent="";
+renderCards();
+}
+function removeWord(index){
+if(builder.solved)return;
+builder.chosen.splice(index,1);
+$("builderFeedback").textContent="";
+renderCards();
+}
+function undoWord(){
+if(builder.solved)return;
+builder.chosen.pop();
+renderCards();
+}
+function clearWords(){
+if(builder.solved)return;
+builder.chosen=[];
+renderCards();
+}
+function checkBuilder(){
+if(builder.solved)return;
+if(!builder.chosen.length){
+$("builderFeedback").innerHTML='<p class="bad">먼저 단어를 선택하세요.</p>';
+return;
+}
+const q=currentStory().problems[builderIndex];
+const correct=words(q.en);
+const chosen=builder.chosen.map(id=>builder.cards.find(c=>c.id===id).word);
+const ok=correct.length===chosen.length &&
+correct.every((w,i)=>w===chosen[i]);
+
+if(ok){
+builder.solved=true;
+completed[builderIndex]=true;
+$("builderFeedback").innerHTML=
+'<p class="good">✓ Excellent! Correct Answer!</p><p>'+
+escapeHTML(q.en.replace(/\s+([,.!?])/g,"$1"))+
+'</p><p class="muted">다음 문제로 자동 이동합니다.</p>';
+$("hints").innerHTML="";
+renderCards();
+builderTimer=setTimeout(()=>{
+if(currentStep!==2)return;
+if(builderIndex<currentStory().problems.length-1){
+builderIndex++;
+builder=null;
+createBuilder();
+}else{
+$("builderFeedback").innerHTML=
+'<p class="good">🎉 All three sentences completed!</p>';
+}
+},1800);
+return;
+}
+
+builder.errors++;
+$("builderFeedback").innerHTML=
+`<p class="bad">✗ Try again! (${builder.errors}회 오답)</p>`;
+const count=Math.min(builder.errors,3);
+$("hints").innerHTML=q.hints.slice(0,count).map((h,i)=>
+`<div class="hint"><b>Hint ${i+1}</b><p>${escapeHTML(h)}</p></div>`).join("");
+}
+function changeQuestion(delta){
+const next=builderIndex+delta;
+if(next<0||next>=currentStory().problems.length)return;
+clearTimeout(builderTimer);
+builderIndex=next;
+builder=null;
+createBuilder();
+}
+
+/* Quiz */
+const questions=[
+["If I ___ Cinderella, I would leave the house.",["am","were","been"],1,"가정법 과거의 be동사는 were를 사용합니다."],
+["If I had a magic wand, I ___ help my friends.",["would","will","am"],0,"주절에는 would + 동사원형을 사용합니다."],
+["If I ___ a bird, I could fly anywhere.",["was flying","were","been"],1,"If I were a bird가 맞습니다."],
+["If she were the queen, she would ___ everyone.",["helped","helps","help"],2,"would 뒤에는 동사원형이 옵니다."],
+["Which sentence is correct?",[
+"If I am the prince, I would help her.",
+"If I were the prince, I would help her.",
+"If I were the prince, I would helped her."
+],1,"If + 과거형, would + 동사원형입니다."]
+];
+function renderQuiz(){
+$("quiz").innerHTML=questions.map((q,i)=>`
+<div class="question">
+<b>Q${i+1}. ${escapeHTML(q[0])}</b>
+<div class="options">
+${q[1].map((o,j)=>`
+<button id="option${i}_${j}" onclick="answerQuiz(${i},${j})">${escapeHTML(o)}</button>`).join("")}
+</div>
+<div id="feedback${i}"></div>
+</div>`).join("");
+Object.entries(quizAnswers).forEach(([i,j])=>paintQuiz(Number(i),j));
+updateScore();
+}
+function answerQuiz(i,j){
+quizAnswers[i]=j;
+paintQuiz(i,j);
+updateScore();
+}
+function paintQuiz(i,j){
+const q=questions[i];
+q[1].forEach((_,k)=>{
+$("option"+i+"_"+k).classList.toggle("chosen",k===j);
+});
+$("feedback"+i).innerHTML=
+`<p class="${j===q[2]?'good':'bad'}">${j===q[2]?'✓ Correct!':'✗ Try again.'}</p>
+<p>${escapeHTML(q[3])}</p>`;
+}
+function updateScore(){
+const score=Object.entries(quizAnswers).filter(([i,j])=>questions[i][2]===j).length;
+$("score").textContent=`Score: ${score} / ${questions.length}`;
+}
+function resetQuiz(){
+quizAnswers={};
+renderQuiz();
+}
+
+/* Writing */
+function storageKey(){return "whatif_fixed_"+currentStory().id}
+function saveWriting(){
+try{
+const data={};
+["write1","write2","write3","ending"].forEach(id=>data[id]=$(id).value);
+localStorage.setItem(storageKey(),JSON.stringify(data));
+localStorage.setItem("whatif_student",$("student").value);
+}catch(e){}
+}
+function loadWriting(){
+let data={};
+try{data=JSON.parse(localStorage.getItem(storageKey())||"{}")}catch(e){}
+["write1","write2","write3","ending"].forEach(id=>$(id).value=data[id]||"");
+$("writingFeedback").hidden=true;
+$("storybook").textContent="Your story will appear here.";
+countWords();
+}
+function countWords(){
+const t=["write1","write2","write3","ending"].map(id=>$(id).value).join(" ").trim();
+$("wordCount").textContent="Total words: "+(t?t.split(/\s+/).length:0);
+}
+function checkWriting(){
+const lines=["write1","write2","write3"].map(id=>$(id).value.trim());
+const ending=$("ending").value.trim();
+const messages=[];
+lines.forEach((line,i)=>{
+if(!line)messages.push(`Sentence ${i+1}: 문장을 작성하세요.`);
+else if(!/\bif\b/i.test(line)||!/\b(would|could|might)\s+(?:not\s+)?[a-z]+/i.test(line))
+messages.push(`Sentence ${i+1}: If절과 would/could/might + 동사원형을 확인하세요.`);
+});
+if(!ending)messages.push("새로운 결말을 작성하세요.");
+const count=[...lines,ending].reduce((n,t)=>n+(t.match(/\bif\b/gi)||[]).length,0);
+if(count<3)messages.push("가정법 문장을 3개 이상 사용하세요.");
+$("writingFeedback").hidden=false;
+$("writingFeedback").innerHTML=messages.length?
+messages.map(m=>`<p class="bad">${escapeHTML(m)}</p>`).join(""):
+'<p class="good">✓ 기본적인 가정법 표현이 확인되었습니다.</p><p>문법과 의미는 선생님과 함께 최종 확인하세요.</p>';
+saveWriting();
+}
+function storyText(){
+return `WHAT IF? MY STORYBOOK
+Student: ${$("student").value.trim()||"Student"}
+Story: ${currentStory().title}
+
+MY IMAGINARY CHOICES
+
+1. ${$("write1").value.trim()}
+
+2. ${$("write2").value.trim()}
+
+3. ${$("write3").value.trim()}
+
+MY NEW ENDING
+
+${$("ending").value.trim()}`;
+}
+function makeBook(){
+saveWriting();
+$("storybook").textContent=storyText();
+notify("Your storybook is ready!");
+}
+async function copyStory(){
+makeBook();
+try{
+await navigator.clipboard.writeText(storyText());
+notify("Story copied!");
+}catch(e){
+const t=document.createElement("textarea");
+t.value=storyText();
+document.body.appendChild(t);
+t.select();
+document.execCommand("copy");
+t.remove();
+notify("Story copied!");
+}
+}
+function saveText(){
+makeBook();
+const blob=new Blob([storyText()],{type:"text/plain;charset=utf-8"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download="WhatIf_"+currentStory().id+".txt";
+document.body.appendChild(a);
+a.click();
+a.remove();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function renderAll(){
+renderStories();
+renderStory();
+renderQuiz();
+loadWriting();
+createBuilder();
+}
+["write1","write2","write3","ending"].forEach(id=>{
+$(id).addEventListener("input",()=>{
+countWords();
+saveWriting();
+});
+});
+$("student").addEventListener("input",saveWriting);
+try{
+$("student").value=localStorage.getItem("whatif_student")||"";
+}catch(e){}
+renderAll();
+go(0);
+</script>
+</body>
+</html>
